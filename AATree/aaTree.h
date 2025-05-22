@@ -275,3 +275,25 @@ typename aaTree<T>::Node * aaTree<T>::remove(Node * node, T & data)
 
     return node;
 }
+
+// пользовательский метод, который вызывает внутренний
+template <typename T>
+void aaTree<T>::clear()
+{
+    clear(root);
+}
+
+// метод для очищения дерева
+template <typename T>
+void aaTree<T>::clear(Node * node)
+{
+    // если узел не нулевой
+    if (node != nullptr) {
+        // очищаем левое поддерево
+        clear(node -> left);
+        // очищаем правое поддерево
+        clear(node -> right);
+        // удаляем узел
+        delete node;
+    }
+}
