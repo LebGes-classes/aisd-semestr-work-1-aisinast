@@ -34,6 +34,10 @@ class aaTree
                 this -> left = left;
                 this -> right = right;
             }
+
+            bool operator==(const Node& other) const {
+                return data == other.data && level == other.level;
+            }
         };
 
         Node * root;
@@ -43,7 +47,6 @@ class aaTree
 	    Node * split(Node * node);
 	    Node * remove(Node * node, T & data);
 	    void inOrder(Node * node);
-	    bool contains(Node * node, T & data);
 	    void clear(Node * node);
 
 };
@@ -79,7 +82,7 @@ typename aaTree<T>::Node * aaTree<T>::insert(Node * node, T & data)
         return new Node(data);
     }
     // идем влево, если data меньше значения корня текущего поддерева
-    else if (data < node->value)
+    else if (data < node->data)
     {
         node->left = insert(node->left, data);
     }
@@ -122,7 +125,7 @@ typename aaTree<T>::Node * aaTree<T>::skew(Node * node)
                 node -> left -> right,  // левым ребенок становится правле поддерево
                 node -> right           // правый ребенок остается прежним
             )
-        ) 
+        );
     }
     // оставляем все как есть, если левых горизонтальных ребер нет
     else 
@@ -162,7 +165,7 @@ typename aaTree<T>::Node * aaTree<T>::split(Node * node)
                 node -> right -> left       // левым потомком становытся левый потомок правого потомка
             ),
             node -> right -> right,         // правым потомком становится правый потомок правого потомка
-        )
+        );
     } 
     else {
         return node;
@@ -188,4 +191,32 @@ void aaTree<T>::inOrder(Node * node)
     std::cout << node -> data << " -> ";
     // идем вправо
     inOrder(node -> right);
+}
+
+// метод для проверки наличия элемента в дереве
+template <typename T>
+bool aaTree<T>::contains(T & data)
+{
+    Node * currentNode = root;
+
+    //пока не достигнем конца дерева
+    while (currentNode != nullptr)
+    {
+        // найдено, если данные равны
+       if (currentNode -> data == data) {
+            return true;
+       }
+       // если data меньше текущего элемента, идем влево
+       else if (currentNode -> data > data) 
+       {
+            currentNode = currentNode -> left;
+       }
+       // если data больше текущего элемента, идем вправо
+       else 
+       {
+            currentNode = currentNode -> right;
+       }
+    }
+
+    return false;
 }
