@@ -19,7 +19,7 @@ class aaTree
             Node * left;
             Node * right;
 
-            Node(int _data) 
+            Node(T _data) 
             {
                 this -> data = _data;
                 level = 1;
@@ -87,7 +87,7 @@ typename aaTree<T>::Node * aaTree<T>::insert(Node * node, T & data)
         node->left = insert(node->left, data);
     }
     // идем вправо, если data больше значения корня текущего поддерева
-    else if (data > node->value)
+    else if (data > node->data)
     {
         node->right = insert(node->right, data);
     }
@@ -115,17 +115,14 @@ typename aaTree<T>::Node * aaTree<T>::skew(Node * node)
     }
     // проверка наличия горизонтального ребра
     else if (node -> left != nullptr && node -> left -> level == node -> level) {
-        return Node(
-            node -> left,               // корнем становится левый для node узел
-            node -> left -> level,      // уровень сохраняется
-            node -> left -> left,       // левый ребенок остается прежним
-            Node(
-                node,                   // старый корень становится правым ребенком
-                node -> level,          // уровень сохраняется
-                node -> left -> right,  // левым ребенок становится правле поддерево
-                node -> right           // правый ребенок остается прежним
-            )
-        );
+        // левый потомок станет новым корнем - сохраняем указатель
+        Node * newRoot = node -> left;
+        // правый потомок левого потомка становится левым потомком
+        node -> left = newRoot -> right;
+        // узел становится правым потомком нового корня
+        newRoot -> right = node;
+
+        return newRoot;
     }
     // оставляем все как есть, если левых горизонтальных ребер нет
     else 
@@ -155,17 +152,16 @@ typename aaTree<T>::Node * aaTree<T>::split(Node * node)
     // проверяем совпадение текущего уровня с уровнем правого-правого потомка
     else if (node -> level == node -> right -> right -> level)
     {
-        return Node(
-            node -> right,                  // корнем становится правый для node узел
-            node -> right -> level + 1,     // уровень поднимается на один
-            Node (
-                node,                       // левым потомком становится текущий узел
-                node -> level,              // уровень остается прежним
-                node -> left,               // левый потомок остается прежним
-                node -> right -> left       // левым потомком становытся левый потомок правого потомка
-            ),
-            node -> right -> right,         // правым потомком становится правый потомок правого потомка
-        );
+        // новым корнем становится правый потомок текущего корня = узла
+        Node * newRoot = node -> right;
+        // правым потомком узла становится левый потомок
+        node -> right = newRoot -> left;
+        // левым потомком нового корня становится старый корень
+        newRoot->left = node;
+        // уровень корня увелиниваем
+        newRoot->level++;
+
+        return newRoot
     } 
     else {
         return node;
@@ -219,4 +215,63 @@ bool aaTree<T>::contains(T & data)
     }
 
     return false;
+}
+
+// пользовательский метод, который вызывает внутренний
+template <typename T>
+void aaTree<T>::remove(T & data)
+{
+    root = remove(root, data)
+}
+
+template <typename T>
+typename aaTree<T>::Node * aaTree<T>::remove(Node * node, T & data)
+{
+    // база рекурсии
+    if (node == nullptr) return nullptr;
+
+    // ищем узел со значением data, двигаясь влево/вправо  
+    if (data < node -> value)
+    {
+        node -> left = remove(node -> left, data);
+    }
+    else if (data > node -> value)
+    {
+        node -> right = remove(node -> right, data),
+    }
+    // когда такой элемент найден
+    else 
+    {
+        // если узел является листом, то просто удаляем узел
+        if (node -> left == nullptr && node -> right == nullptr)
+        {
+            delete node;
+            return nullptr;
+        }
+        // если у узла оба потомка
+        else if (node -> left != nullptr && node -> right != nullptr)
+        {
+            // переходим в правое поддерево
+            Node * newNode = node -> right;
+            // ищем наименьшее значение в левом поддереве
+            while (newNode -> left) newNode = newNode -> left;
+            // узел с наименьшим значением помещаем вместо исходного узла 
+            node -> data = newNode -> data
+            // удаляем дубликат узла с наименьшим значением
+            node -> right = remove(node -> right, newNode -> data);
+        }
+        // если у узла один потомок, то новый узел - существующий потомок, узел удаляем
+        else 
+        {
+            Node * newNode = node -> left ? node -> left : node -> right;
+            delete node;
+            return newNode;
+        }
+    }
+
+    // балансируем
+    node = skew(node);
+    node = split(node);
+
+    return node;
 }
