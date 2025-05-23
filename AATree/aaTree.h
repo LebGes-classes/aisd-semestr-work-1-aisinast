@@ -161,7 +161,7 @@ typename aaTree<T>::Node * aaTree<T>::split(Node * node)
         // уровень корня увелиниваем
         newRoot->level++;
 
-        return newRoot
+        return newRoot;
     } 
     else {
         return node;
@@ -173,6 +173,8 @@ template <typename T>
 void aaTree<T>::inOrder()
 {
     inOrder(root);
+
+    std::cout << std::endl;
 }
 
 // метод для обхода в дереве в порядке левое поддерево - корень - правое поддерево
@@ -184,7 +186,7 @@ void aaTree<T>::inOrder(Node * node)
     // идем в левое поддерево, пока не дойдем до базового случая
     inOrder(node -> left);
     // выводим элемент
-    std::cout << node -> data << " -> ";
+    std::cout << node -> data << " ";
     // идем вправо
     inOrder(node -> right);
 }
@@ -221,7 +223,7 @@ bool aaTree<T>::contains(T & data)
 template <typename T>
 void aaTree<T>::remove(T & data)
 {
-    root = remove(root, data)
+    root = remove(root, data);
 }
 
 template <typename T>
@@ -231,13 +233,13 @@ typename aaTree<T>::Node * aaTree<T>::remove(Node * node, T & data)
     if (node == nullptr) return nullptr;
 
     // ищем узел со значением data, двигаясь влево/вправо  
-    if (data < node -> value)
+    if (data < node -> data)
     {
         node -> left = remove(node -> left, data);
     }
-    else if (data > node -> value)
+    else if (data > node -> data)
     {
-        node -> right = remove(node -> right, data),
+        node -> right = remove(node -> right, data);
     }
     // когда такой элемент найден
     else 
@@ -256,7 +258,7 @@ typename aaTree<T>::Node * aaTree<T>::remove(Node * node, T & data)
             // ищем наименьшее значение в левом поддереве
             while (newNode -> left) newNode = newNode -> left;
             // узел с наименьшим значением помещаем вместо исходного узла 
-            node -> data = newNode -> data
+            node -> data = newNode -> data;
             // удаляем дубликат узла с наименьшим значением
             node -> right = remove(node -> right, newNode -> data);
         }
@@ -281,6 +283,7 @@ template <typename T>
 void aaTree<T>::clear()
 {
     clear(root);
+    root = nullptr;
 }
 
 // метод для очищения дерева
@@ -288,12 +291,15 @@ template <typename T>
 void aaTree<T>::clear(Node * node)
 {
     // если узел не нулевой
-    if (node != nullptr) {
-        // очищаем левое поддерево
-        clear(node -> left);
-        // очищаем правое поддерево
-        clear(node -> right);
-        // удаляем узел
-        delete node;
-    }
+    if (node == nullptr) return;
+
+    // очищаем левое поддерево
+    clear(node -> left);
+    
+    // очищаем правое поддерево
+    clear(node -> right);
+
+    // удаляем узел
+    delete node;
+
 }
